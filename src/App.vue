@@ -5,19 +5,30 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapMutations } from 'vuex';
 
 export default {
   name: 'App',
-  async created(){
+  async created() {
     this.fetchWeather();
     this.fetchRates();
   },
-  methods:{
-    ...mapActions('weather',['fetchWeather']),
-    ...mapActions('exchangeRates',['fetchRates'])
+  mounted() {
+    if (localStorage.getItem('city-list')) {
+      console.log('sa');
+
+      for (const item of JSON.parse(localStorage.getItem('city-list'))) {
+        console.log(item);
+        this.addCityList(item);
+      }
+    }
   },
-}
+  methods: {
+    ...mapActions('weather', ['fetchWeather']),
+    ...mapActions('exchangeRates', ['fetchRates']),
+    ...mapMutations('weather', ['addCityList']),
+  },
+};
 </script>
 
 <style>
@@ -27,9 +38,9 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   margin: 2vh 20vh;
-} 
+}
 
-*{
+* {
   box-sizing: border-box;
 }
 </style>

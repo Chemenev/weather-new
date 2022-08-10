@@ -1,4 +1,4 @@
-import { HTTP_RATES } from '@/axios/';
+import axios from "axios"
 
 export default {
 	namespaced: true,
@@ -38,11 +38,7 @@ export default {
 	},
 	actions: {
 		async fetchRates({ commit }) {
-			let data;
-			await HTTP_RATES.get()
-				.then(response => {
-					data = response.data;
-				});
+			const { data } = await axios.get('https://cdn.cur.su/api/cbr.json');
 			commit('set', { baseСurrency: data.base, rates: data.rates, ratesListNames: Object.keys(data.rates) });
 		}
 	},

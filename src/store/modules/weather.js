@@ -1,9 +1,7 @@
-//import axios from "axios";
-import { HTTP_WEATHER } from '@/axios/';
-//import Vue from 'vue'
+//import { HTTP_WEATHER } from '@/axios/';
+import axios from 'axios';
 
 const API_KEY = 'b35878a2c5ab36e25486221e2dcd1cc3';
-//const URL = 'http://api.openweathermap.org/data/2.5/forecast?';
 
 const filterdWeatherByDay = (data) => {
 	const groupDays = [];
@@ -23,6 +21,7 @@ export default {
 	state: {
 		arrlistDays: [],
 		cityName: '',
+		cityList: [],
 		firtsDay: {},
 		enterCity: 'Moscow',
 		isError: false,
@@ -33,7 +32,16 @@ export default {
 			for (const key in udatedState) {
 				state[key] = udatedState[key]
 			}
-		}
+		},
+		addCityList(state, pushValue) {
+			if (!state.cityList.includes(pushValue)) {
+				state.cityList.push(pushValue);
+				if (state.cityList.length > 4) {
+					state.cityList.shift();
+				}
+				localStorage.setItem("city-list", JSON.stringify(state.cityList));
+			}
+		},
 	},
 	getters: {
 		listDays(state) {
@@ -46,7 +54,6 @@ export default {
 			return state.firstDay
 		},
 		enterCity(state) {
-			console.log('entCity ' + state.enterCity)
 			return state.enterCity
 		},
 		isError(state) {
@@ -54,19 +61,18 @@ export default {
 		},
 		loaded(state) {
 			return state.loaded
+		},
+		cityList(state) {
+			return state.cityList
 		}
 
 	},
 	actions: {
 		async fetchWeather({ commit, state }, city = state.enterCity) {
 			try {
-				let data;
-				await HTTP_WEATHER.get(`forecast?q=${city}&appid=${API_KEY}&units=metric`)
-					.then(response => {
-						data = response.data;
-					});
+				const { data } = await axios.get(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`);
 				commit('set', { enterCity: city, firstDay: data?.list?.[0] || '', cityName: data.city.name, loaded: true },);
-
+				commit('addCityList', city)
 				const days = filterdWeatherByDay(data);
 				commit('set', { arrlistDays: days });
 				if (state.isError) {
